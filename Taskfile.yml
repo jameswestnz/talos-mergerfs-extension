@@ -1,0 +1,40 @@
+version: '3'
+
+vars:
+  DEST: _out/
+  IMAGE_NAME: ghcr.io/jameswestnz/talos-mergerfs-extension
+  IMAGE_TAG:
+    sh: git describe --match=none --always --abbrev=8 --dirty
+  PKGS: v1.7.0
+  PKGS_PREFIX: ghcr.io/siderolabs
+  PLATFORM: linux/amd64,linux/arm64
+
+tasks:
+  build:
+    cmds:
+      - docker buildx build
+        -f Pkgfile
+        --target mergerfs
+        --platform={{ .PLATFORM }}
+        --build-arg=PKGS={{ .PKGS }}
+        --build-arg=PKGS_PREFIX={{ .PKGS_PREFIX }}
+        --tag {{ .IMAGE_NAME }}:{{ .IMAGE_TAG }}
+        {{ .BUILD_ARGS }}
+        .
+  load:
+    cmds:
+      - task: build
+        vars:
+          BUILD_ARGS: --load
+          PLATFORM:
+            sh: echo "linux/$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')"
+  local:
+    cmds:
+      - task: build
+        vars:
+          BUILD_ARGS: --output="type=local,dest={{ .DEST }}"
+  push:
+    cmds:
+      - task: build
+        vars:
+          BUILD_ARGS: --push

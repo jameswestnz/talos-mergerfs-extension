@@ -1,0 +1,10 @@
+# syntax = ghcr.io/siderolabs/bldr:v0.3.1
+
+format: v1alpha2
+
+vars:
+  # renovate: datasource=github-releases depName=trapexit/mergerfs
+  MERGERFS_VERSION: 2.40.2
+
+labels:
+  org.opencontainers.image.source: https://github.com/jameswestnz/talos-mergerfs-extension
